@@ -1,0 +1,5 @@
+{
+  "framework": "remix",
+  "buildCommand": "react-router build",
+  "installCommand": "npm install"
+}

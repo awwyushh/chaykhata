@@ -101,6 +101,37 @@ export default function Settings() {
     a.click();
   };
 
+  const shareQr = async () => {
+    if (!qrDataUrl) return;
+    const shareText = `☕ ऋणं चायस्य, स्मरणं मम।\nहे मित्र, त्वया पीता चाय अद्यापि अप्रतिदत्ता अस्ति।\n\nTapri न्यायालये तव नाम अंकितम् 😈\n\nSettle thy chai:\n${shareUrl}`;
+
+    // Try sharing with QR image (Android/modern browsers)
+    if (navigator.share) {
+      try {
+        const res = await fetch(qrDataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `chaykhata-${user.username}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], text: shareText });
+          return;
+        }
+        // Fallback: share text+url only
+        await navigator.share({ text: shareText });
+        return;
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          // Share failed, fall through to clipboard
+        } else {
+          return;
+        }
+      }
+    }
+    // Last resort: copy to clipboard
+    await navigator.clipboard.writeText(shareText);
+    toast.success("Message copied to clipboard!");
+  };
+
   return (
     <div className="min-h-screen bg-chai-gradient">
       <Navbar user={user} />
@@ -144,10 +175,16 @@ export default function Settings() {
                 <div className="p-3 rounded-2xl bg-[#fdf6e3] shadow-inner">
                   <img src={qrDataUrl} alt="QR code for your ChayKhata link" width={160} height={160} />
                 </div>
-                <Button variant="secondary" size="sm" onClick={downloadQr} className="flex items-center gap-1.5">
-                  <Download size={13} />
-                  Save QR
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="secondary" size="sm" onClick={downloadQr} className="flex items-center gap-1.5">
+                    <Download size={13} />
+                    Save QR
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={shareQr} className="flex items-center gap-1.5">
+                    <Share2 size={13} />
+                    Share QR
+                  </Button>
+                </div>
               </div>
             )}
           </div>

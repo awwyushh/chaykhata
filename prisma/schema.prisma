@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ItemType {
+  CHAY
+  LUNCH
+  SNACKS
+  CUSTOM
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  fullName  String
+  birthDate DateTime @db.Date
+  pinHash   String
+  avatar    String?
+  bio       String?
+  createdAt DateTime @default(now())
+
+  debtsAsCreditor Debt[] @relation("Creditor")
+  debtsAsDebtor   Debt[] @relation("Debtor")
+
+  @@index([username])
+}
+
+model Debt {
+  id         String    @id @default(cuid())
+  creditorId String
+  debtorId   String
+  itemType   ItemType  @default(CHAY)
+  customItem String?
+  count      Int       @default(1)
+  notes      String?
+  paid       Boolean   @default(false)
+  paidAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  creditor User @relation("Creditor", fields: [creditorId], references: [id], onDelete: Cascade)
+  debtor   User @relation("Debtor", fields: [debtorId], references: [id], onDelete: Cascade)
+
+  @@index([creditorId])
+  @@index([debtorId])
+  @@index([paid])
+  @@index([createdAt])
+}

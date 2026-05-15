@@ -6,10 +6,9 @@ import {
   Settings,
   LogOut,
   Coffee,
-  User,
   Home,
 } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { cn, getDicebearUrl } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { useFetcher } from "react-router";
 
@@ -81,7 +80,11 @@ export function Navbar({ user }: NavbarProps) {
                 to={`/${user.username}`}
                 className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm text-chai-400 hover:text-cream-100 hover:bg-white/10 transition-colors"
               >
-                <User size={14} />
+                <img
+                  src={getDicebearUrl(user.username)}
+                  alt={user.username}
+                  className="w-6 h-6 rounded-lg bg-chai-700"
+                />
                 <span>{user.username}</span>
               </Link>
               <fetcher.Form method="post" action="/api/logout">

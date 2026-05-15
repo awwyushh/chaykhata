@@ -1,12 +1,14 @@
 import { Form, useLoaderData, useActionData, useNavigation } from "react-router";
 import { motion } from "framer-motion";
-import { User, Lock, Share2, Trash2, Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { Lock, Share2, Copy, Check, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import type { Route } from "./+types/settings";
 import { requireUser } from "~/lib/session.server";
 import { prisma } from "~/lib/db.server";
 import { hashPin, verifyPin } from "~/lib/auth.server";
 import { Navbar } from "~/components/layout/Navbar";
+import { getDicebearUrl } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import toast from "react-hot-toast";
@@ -68,6 +70,7 @@ export default function Settings() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const [copied, setCopied] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const isSubmitting = navigation.state === "submitting";
 
   const shareUrl =
@@ -75,11 +78,27 @@ export default function Settings() {
       ? `${window.location.origin}/${user.username}`
       : `https://chaykhata.vercel.app/${user.username}`;
 
+  useEffect(() => {
+    QRCode.toDataURL(shareUrl, {
+      width: 200,
+      margin: 2,
+      color: { dark: "#1a0a00", light: "#fdf6e3" },
+    }).then(setQrDataUrl);
+  }, [shareUrl]);
+
   const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     toast.success("Link copied!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadQr = () => {
+    if (!qrDataUrl) return;
+    const a = document.createElement("a");
+    a.href = qrDataUrl;
+    a.download = `chaykhata-${user.username}.png`;
+    a.click();
   };
 
   return (
@@ -119,12 +138,28 @@ export default function Settings() {
             <p className="text-xs text-chai-600 mt-2">
               Share this with friends so they can log debts to your khata
             </p>
+
+            {qrDataUrl && (
+              <div className="mt-4 flex flex-col items-center gap-3">
+                <div className="p-3 rounded-2xl bg-[#fdf6e3] shadow-inner">
+                  <img src={qrDataUrl} alt="QR code for your ChayKhata link" width={160} height={160} />
+                </div>
+                <Button variant="secondary" size="sm" onClick={downloadQr} className="flex items-center gap-1.5">
+                  <Download size={13} />
+                  Save QR
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Profile settings */}
           <div className="glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <User size={16} className="text-chai-400" />
+              <img
+                src={getDicebearUrl(user.username)}
+                alt={user.username}
+                className="w-8 h-8 rounded-xl bg-chai-700"
+              />
               <h2 className="font-semibold text-cream-100">Profile</h2>
             </div>
 

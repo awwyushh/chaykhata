@@ -13,7 +13,7 @@ import {
 import type { Route } from "./+types/$username";
 import { prisma } from "~/lib/db.server";
 import { getUser } from "~/lib/session.server";
-import { ITEM_LABELS, formatDate } from "~/lib/utils";
+import { ITEM_LABELS, formatDate, getDicebearUrl } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { ChaiCup } from "~/components/ChaiCup";
@@ -184,8 +184,12 @@ export default function PublicProfile() {
           className="glass rounded-3xl p-6 mb-6 border border-white/10"
         >
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-chai-400 to-chai-700 flex items-center justify-center text-2xl font-bold text-cream-50 flex-shrink-0">
-              {profileUser.fullName[0].toUpperCase()}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-chai-400 to-chai-700 flex-shrink-0 overflow-hidden">
+              <img
+                src={getDicebearUrl(profileUser.username)}
+                alt={profileUser.fullName}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <h1

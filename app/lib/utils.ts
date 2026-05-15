@@ -56,3 +56,7 @@ export function generateShareUrl(username: string) {
   }
   return `/${username}`;
 }
+
+export function getDicebearUrl(username: string) {
+  return `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(username)}`;
+}
